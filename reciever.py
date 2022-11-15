@@ -15,16 +15,24 @@ socket_udp.bind((recieverIP, recieverPort))
 print("UDP socket created successfully....." )
 chunks = {}
 chunkNumber = 0
+prevChunkNumber = 0
+num_duplicate_packet = 0
+total_packets_received = 0
 
 while True:
 
     #wait to recieve message from the server
     bytesAddressPair = socket_udp.recvfrom(bufferSize)
+    total_packets_received += 1
     # print(bytesAddressPair) #print recieved message
 
     #split the recieved tuple into variables
     recievedMessage = bytesAddressPair[0]
     chunk_number = int.from_bytes(recievedMessage[0:2], byteorder='big')
+    prevChunkNumber = chunkNumber
+    if chunk_number == prevChunkNumber:
+        num_duplicate_packet += 1
+        print("Duplicate packet recieved")
     last_file_chunk = bool.from_bytes(recievedMessage[2:3], byteorder='big')
     print("Chunk number: {}".format(chunk_number))
     print("Last chunk: {}".format(last_file_chunk))
@@ -55,4 +63,8 @@ for chunk in chunks:
 image.close()
 
 print("Image recieved successfully")
+
+print("Total packets recieved: {}".format(total_packets_received))
+print("Total duplicate packets recieved: {}".format(num_duplicate_packet))
+print("Average packet loss: {}".format(num_duplicate_packet/total_packets_received))
 

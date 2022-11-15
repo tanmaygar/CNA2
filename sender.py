@@ -23,9 +23,10 @@ while chunk:
     chunk = image.read(bufferSize-3)
 # close image file
 image.close()
-
-tmp_chunk_number = 0
 print(chunkNumber)
+
+total_transmissions = 0
+total_retransmissions = 0
 
 # send chunks to reciever
 for chunk in chunks:
@@ -43,6 +44,7 @@ for chunk in chunks:
 
     isACK = False
     socket_udp.sendto(message, recieverAddressPort)
+    total_transmissions += 1
     print("Message sent successfully....." )
     while isACK == False:
         try:
@@ -53,10 +55,14 @@ for chunk in chunks:
         except socket.timeout:
             print("Timeout occured, sending again")
             socket_udp.sendto(message, recieverAddressPort)
+            total_retransmissions += 1
+            total_transmissions += 1
     
 socket_udp.close()
 
-
+print("Total transmissions: {}".format(total_transmissions))
+print("Total retransmissions: {}".format(total_retransmissions))
+print("Average retransmissions per transmission: {}".format(total_retransmissions/total_transmissions))
 
 
 # import socket
