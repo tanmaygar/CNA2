@@ -20,7 +20,7 @@ while True:
 
     #wait to recieve message from the server
     bytesAddressPair = socket_udp.recvfrom(bufferSize)
-    print(bytesAddressPair) #print recieved message
+    # print(bytesAddressPair) #print recieved message
 
     #split the recieved tuple into variables
     recievedMessage = bytesAddressPair[0]

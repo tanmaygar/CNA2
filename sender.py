@@ -11,7 +11,7 @@ socket_udp = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 socket_udp.settimeout(1) # value in seconds
 
 # open image file
-image = open("testFile.jpg", "rb")
+image = open("img.jpg", "rb")
 # read image file in chunks
 chunk = image.read(bufferSize-3)
 # store chunks in a dictionary
@@ -25,11 +25,11 @@ while chunk:
 image.close()
 
 tmp_chunk_number = 0
-
+print(chunkNumber)
 
 # send chunks to reciever
 for chunk in chunks:
-    # time.sleep(0.01)
+    time.sleep(0.01)
     # Send to server using created UDP socket
     chunk_number = chunk.to_bytes(2, byteorder='big')
     last_file_chunk = False
