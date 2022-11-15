@@ -14,8 +14,8 @@ socket_udp.bind((recieverIP, recieverPort))
 
 print("UDP socket created successfully....." )
 chunks = {}
-chunkNumber = 0
-prevChunkNumber = 0
+chunkNumber = -1
+prevChunkNumber = -1
 num_duplicate_packet = 0
 total_packets_received = 0
 
@@ -27,19 +27,25 @@ while True:
     # print(bytesAddressPair) #print recieved message
 
     #split the recieved tuple into variables
+    senderAddress = bytesAddressPair[1]
     recievedMessage = bytesAddressPair[0]
     chunk_number = int.from_bytes(recievedMessage[0:2], byteorder='big')
-    prevChunkNumber = chunkNumber
+    chunkNumber = chunk_number
+    # prevChunkNumber = chunkNumber
     if chunk_number == prevChunkNumber:
         num_duplicate_packet += 1
         print("Duplicate packet recieved")
+        message = str.encode("Recieved {}".format(chunk_number))
+        socket_udp.sendto(message, senderAddress)
+        continue
     last_file_chunk = bool.from_bytes(recievedMessage[2:3], byteorder='big')
     print("Chunk number: {}".format(chunk_number))
     print("Last chunk: {}".format(last_file_chunk))
     chunk_data = recievedMessage[3:]
     chunks[chunk_number] = chunk_data
+    prevChunkNumber = chunkNumber
 
-    senderAddress = bytesAddressPair[1]
+    
 
     # #print them just for understanding
     # msgString = "Message from Client:{}".format(recievedMessage)

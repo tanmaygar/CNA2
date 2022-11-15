@@ -1,6 +1,6 @@
 import socket
 import time
-
+import sys
 senderIP = "10.0.0.1"
 senderPort   = 20001
 recieverAddressPort = ("10.0.0.2", 20002)
@@ -8,10 +8,11 @@ bufferSize  = 1024 #Message Buffer Size
 
 # Create a UDP socket at reciever side
 socket_udp = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-socket_udp.settimeout(1) # value in seconds
+TIMEOUTTIME = 0.005
+socket_udp.settimeout(TIMEOUTTIME) # value in seconds
 
 # open image file
-image = open("img.jpg", "rb")
+image = open("testFile.jpg", "rb")
 # read image file in chunks
 chunk = image.read(bufferSize-3)
 # store chunks in a dictionary
@@ -27,10 +28,11 @@ print(chunkNumber)
 
 total_transmissions = 0
 total_retransmissions = 0
-
+total_size = 0
+start_time = time.time()
 # send chunks to reciever
 for chunk in chunks:
-    time.sleep(0.01)
+    # time.sleep(0.01)
     # Send to server using created UDP socket
     chunk_number = chunk.to_bytes(2, byteorder='big')
     last_file_chunk = False
@@ -41,11 +43,12 @@ for chunk in chunks:
     #combine chunk number and chunk data
     chunk_data = chunk_number + last_file_chunk + chunks[chunk]
     message = chunk_data
+    total_size += sys.getsizeof(message)
 
     isACK = False
     socket_udp.sendto(message, recieverAddressPort)
     total_transmissions += 1
-    print("Message sent successfully....." )
+    print("Message sent successfully..... {}".format(chunk) )
     while isACK == False:
         try:
             recievedMessage, senderAddress = socket_udp.recvfrom(bufferSize)
@@ -60,9 +63,19 @@ for chunk in chunks:
     
 socket_udp.close()
 
+end_time = time.time()
 print("Total transmissions: {}".format(total_transmissions))
 print("Total retransmissions: {}".format(total_retransmissions))
 print("Average retransmissions per transmission: {}".format(total_retransmissions/total_transmissions))
+#average throughput in kilobytes per second
+print("Average throughput: {}".format(total_size/(end_time-start_time)/1024))
+print("Average Throughput: {}".format(total_size/(end_time-start_time)))
+
+# output the results in a file
+with open("output.txt", "a") as f:
+    f.write("{}:{}:{}".format(TIMEOUTTIME * 1000, total_retransmissions, total_size/(end_time-start_time)/1024))
+#close the file
+f.close()
 
 
 # import socket
