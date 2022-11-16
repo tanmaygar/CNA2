@@ -8,7 +8,7 @@ bufferSize  = 1024 #Message Buffer Size
 
 # Create a UDP socket at reciever side
 socket_udp = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-TIMEOUTTIME = 0.005
+TIMEOUTTIME = 100/1000
 socket_udp.settimeout(TIMEOUTTIME) # value in seconds
 
 # open image file
@@ -72,8 +72,8 @@ print("Average throughput: {}".format(total_size/(end_time-start_time)/1024))
 print("Average Throughput: {}".format(total_size/(end_time-start_time)))
 
 # output the results in a file
-with open("output.txt", "a") as f:
-    f.write("{}:{}:{}".format(TIMEOUTTIME * 1000, total_retransmissions, total_size/(end_time-start_time)/1024))
+with open("output2.txt", "a") as f:
+    f.write("{}:{}:{}\n".format(TIMEOUTTIME * 1000, total_retransmissions, total_size/(end_time-start_time)))
 #close the file
 f.close()
 
