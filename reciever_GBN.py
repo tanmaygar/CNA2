@@ -1,4 +1,5 @@
 import socket
+import time
 
 recieverIP = "10.0.0.2"
 recieverPort   = 20002
@@ -29,6 +30,9 @@ while True:
     #split the recieved tuple into variables
     senderAddress = bytesAddressPair[1]
     recievedMessage = bytesAddressPair[0]
+    #if packet is empty, then end of file
+    if len(recievedMessage) == 0:
+        break
     chunk_number = int.from_bytes(recievedMessage[0:2], byteorder='big')
     chunkNumber = chunk_number
     # prevChunkNumber = chunkNumber
@@ -40,7 +44,7 @@ while True:
     #     continue
     last_file_chunk = bool.from_bytes(recievedMessage[2:3], byteorder='big')
     print("Chunk number: {}".format(chunk_number))
-    print("Last chunk: {}".format(last_file_chunk))
+    # print("Last chunk: {}".format(last_file_chunk))
     chunk_data = recievedMessage[3:]
     chunks[chunkNumber] = chunk_data
     prevChunkNumber = chunkNumber
@@ -58,9 +62,9 @@ while True:
     message = str.encode("{}".format(chunk_number))
     socket_udp.sendto(message, senderAddress)
 
-    if last_file_chunk == True:
-        break
-
+    # if last_file_chunk == True:
+    #     break
+time.sleep(2)
 # open image file
 image = open("received.jpg", "wb")
 # read image file in chunks
@@ -73,6 +77,6 @@ print("Image recieved successfully")
 print(len(chunks))
 
 print("Total packets recieved: {}".format(total_packets_received))
-print("Total duplicate packets recieved: {}".format(num_duplicate_packet))
-print("Average packet loss: {}".format(num_duplicate_packet/total_packets_received))
-
+# print("Total duplicate packets recieved: {}".format(num_duplicate_packet))
+# print("Average packet loss: {}".format(num_duplicate_packet/total_packets_received))
+# time.sleep(2)

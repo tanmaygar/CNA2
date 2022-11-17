@@ -32,10 +32,12 @@ print(chunkNumber)
 # Implement Go Back N protocol
 # send chunks in chunks dictionary
 
-WINDOWS_SIZE = 2
+WINDOWS_SIZE = 256
 base = 0
 nextSeqNum = 0
 mutex_lock = threading.Lock()
+total_size = 0
+total_transmissions = 0
 
 def send_func():
     global base
@@ -43,6 +45,9 @@ def send_func():
     global chunks
     global chunkNumber
     global mutex_lock
+    global total_size
+    global total_transmissions
+    start_new_thread(receive_func, ())
     while base < chunkNumber:
         mutex_lock.acquire()
         while nextSeqNum < base + WINDOWS_SIZE and nextSeqNum < chunkNumber:
@@ -54,7 +59,14 @@ def send_func():
             socket_udp.sendto(chunk, recieverAddressPort)
             print("Message sent successfully..... {}".format(nextSeqNum))
             nextSeqNum += 1
+            total_size += len(chunk)
+            total_transmissions += 1
         mutex_lock.release()
+    print("Here now")
+    # send an empty chunk to indicate end of file
+    socket_udp.sendto(b'', recieverAddressPort)
+    print("EOF")
+
 
 def receive_func():
     global base
@@ -67,6 +79,9 @@ def receive_func():
             recievedMessage, senderAddress = socket_udp.recvfrom(bufferSize)
             mutex_lock.acquire()
             recievedMessage = int(recievedMessage.decode())
+            if recievedMessage != base:
+                mutex_lock.release()
+                raise socket.timeout
             print("Message from Server: {}".format(recievedMessage))
             base = recievedMessage + 1
             mutex_lock.release()
@@ -78,15 +93,17 @@ def receive_func():
 
 def main():
     send_thread = threading.Thread(target=send_func)
-    receive_thread = threading.Thread(target=receive_func)
+    # receive_thread = threading.Thread(target=receive_func)
     send_thread.start()
-    receive_thread.start()
+    # receive_thread.start()
     send_thread.join()
-    receive_thread.join()
+    # receive_thread.join()
 
 
 if __name__ == "__main__":
     main()
+    # close the socket
+    socket_udp.close()
 # try:
 #     while base < chunkNumber:
 #         while nextSeqNum < base + WINDOWS_SIZE and nextSeqNum < chunkNumber:
@@ -130,7 +147,6 @@ if __name__ == "__main__":
 
 
 
-# close the socket
-socket_udp.close()
+
 
 
