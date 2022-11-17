@@ -72,5 +72,5 @@ print("Image recieved successfully")
 
 print("Total packets recieved: {}".format(total_packets_received))
 print("Total duplicate packets recieved: {}".format(num_duplicate_packet))
-print("Average packet loss: {}".format(num_duplicate_packet/total_packets_received))
+# print("Average packet loss: {}".format(num_duplicate_packet/total_packets_received))
 
