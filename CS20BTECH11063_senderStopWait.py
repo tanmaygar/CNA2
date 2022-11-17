@@ -43,7 +43,7 @@ for chunk in chunks:
     #combine chunk number and chunk data
     chunk_data = chunk_number + last_file_chunk + chunks[chunk]
     message = chunk_data
-    total_size += sys.getsizeof(message)
+    total_size += len(message)#sys.getsizeof(message)
 
     isACK = False
     socket_udp.sendto(message, recieverAddressPort)
