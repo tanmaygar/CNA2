@@ -3,6 +3,7 @@ import time
 import sys
 from _thread import *
 import threading
+import os
 senderIP = "10.0.0.1"
 senderPort   = 20001
 recieverAddressPort = ("10.0.0.2", 20002)
@@ -10,7 +11,7 @@ bufferSize  = 1024 #Message Buffer Size
 
 # Create a UDP socket at reciever side
 socket_udp = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-TIMEOUT = 10/1000
+TIMEOUT = 25/1000
 socket_udp.settimeout(TIMEOUT) # value in seconds
 
 # open image file
@@ -33,14 +34,14 @@ print(chunkNumber)
 # send chunks in chunks dictionary
 
 WINDOWS_SIZE = 1
-window_starting_index = 0
+base = 0
 next_sequence_num = 0
 mutex_lock = threading.Lock()
 total_size = 0
 total_transmissions = 0
 
 def send_func():
-    global window_starting_index
+    global base
     global next_sequence_num
     global chunks
     global chunkNumber
@@ -48,9 +49,9 @@ def send_func():
     global total_size
     global total_transmissions
     start_new_thread(receive_func, ())
-    while window_starting_index < chunkNumber:
+    while base < chunkNumber:
         mutex_lock.acquire()
-        while next_sequence_num < window_starting_index + WINDOWS_SIZE and next_sequence_num < chunkNumber:
+        while next_sequence_num < base + WINDOWS_SIZE and next_sequence_num < chunkNumber:
             chunk = chunks[next_sequence_num]
             last_file_chunk = False
             if next_sequence_num == chunkNumber-1:
@@ -69,26 +70,26 @@ def send_func():
 
 
 def receive_func():
-    global window_starting_index
+    global base
     global chunks
     global chunkNumber
     global next_sequence_num
     global mutex_lock
-    while window_starting_index < chunkNumber:
+    while base < chunkNumber:
         try:
             recievedMessage, senderAddress = socket_udp.recvfrom(bufferSize)
             mutex_lock.acquire()
             recievedMessage = int(recievedMessage.decode())
-            if recievedMessage != window_starting_index:
+            if recievedMessage != base:
                 mutex_lock.release()
                 raise socket.timeout
             print("Message from Server: {}".format(recievedMessage))
-            window_starting_index = recievedMessage + 1
+            base = recievedMessage + 1
             mutex_lock.release()
         except socket.timeout:
             mutex_lock.acquire()
-            print("Timeout occured, sending again: ", window_starting_index, next_sequence_num)
-            next_sequence_num = window_starting_index
+            print("Timeout occured, sending again: ", base, next_sequence_num)
+            next_sequence_num = base
             mutex_lock.release()
 
 def main():
@@ -103,9 +104,9 @@ def main():
     socket_udp.close()
     end_time = time.time()
     # average throughput
-    print("Average throughput: ", (total_size/1024)/(end_time-start_time))
+    print("Average throughput: ", (os.path.getsize('testFile.jpg')/1024)/(end_time-start_time))
     with open("output2.txt", "a") as f:
-        f.write("{}:{}:{}\n".format(TIMEOUT * 1000, WINDOWS_SIZE , total_size/(end_time-start_time)))
+        f.write("{}:{}:{}\n".format(TIMEOUT * 1000, WINDOWS_SIZE , (os.path.getsize('testFile.jpg')/1024)/(end_time-start_time)))
         #close the file
     f.close()
 
