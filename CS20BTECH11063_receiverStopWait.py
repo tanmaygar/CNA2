@@ -38,7 +38,7 @@ while True:
     if chunk_number == prevChunkNumber:
         num_duplicate_packet += 1
         print("Duplicate packet recieved")
-        message = str.encode("Recieved {}".format(chunk_number))
+        message = str.encode("{}".format(chunk_number))
         socket_udp.sendto(message, senderAddress)
         continue
     last_file_chunk = bool.from_bytes(recievedMessage[2:3], byteorder='big')
@@ -57,7 +57,7 @@ while True:
     # print(detailString)
 
     # Sending a reply to client
-    message = str.encode("Recieved {}".format(chunk_number))
+    message = str.encode("{}".format(chunk_number))
     socket_udp.sendto(message, senderAddress)
 
 # open image file

@@ -53,9 +53,16 @@ for chunk in chunks:
     while isACK == False:
         try:
             recievedMessage, senderAddress = socket_udp.recvfrom(bufferSize)
-            print("Message from Server: {}".format(recievedMessage))
-            print("Server IP Address: {}".format(senderAddress))
-            isACK = True
+            if int(recievedMessage.decode()) != chunk:
+                total_retransmissions +=1 
+                socket_udp.sendto(message, recieverAddressPort)
+                total_transmissions += 1
+                # raise socket.timeout
+                # pass
+            else:
+                print("Message from Server: {}".format(recievedMessage))
+                print("Server IP Address: {}".format(senderAddress))
+                isACK = True
         except socket.timeout:
             print("Timeout occured, sending again")
             socket_udp.sendto(message, recieverAddressPort)
