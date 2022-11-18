@@ -1,6 +1,7 @@
 import socket
 import time
 import sys
+import os
 senderIP = "10.0.0.1"
 senderPort   = 20001
 recieverAddressPort = ("10.0.0.2", 20002)
@@ -66,6 +67,7 @@ socket_udp.sendto(b'', recieverAddressPort)
 socket_udp.close()
 
 end_time = time.time()
+total_size = os.path.getsize("testFile.jpg")
 print("Total transmissions: {}".format(total_transmissions))
 print("Total retransmissions: {}".format(total_retransmissions))
 print("Average retransmissions per transmission: {}".format(total_retransmissions/total_transmissions))
