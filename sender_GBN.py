@@ -33,32 +33,32 @@ print(chunkNumber)
 # send chunks in chunks dictionary
 
 WINDOWS_SIZE = 1
-base = 0
-nextSeqNum = 0
+window_starting_index = 0
+next_sequence_num = 0
 mutex_lock = threading.Lock()
 total_size = 0
 total_transmissions = 0
 
 def send_func():
-    global base
-    global nextSeqNum
+    global window_starting_index
+    global next_sequence_num
     global chunks
     global chunkNumber
     global mutex_lock
     global total_size
     global total_transmissions
     start_new_thread(receive_func, ())
-    while base < chunkNumber:
+    while window_starting_index < chunkNumber:
         mutex_lock.acquire()
-        while nextSeqNum < base + WINDOWS_SIZE and nextSeqNum < chunkNumber:
-            chunk = chunks[nextSeqNum]
+        while next_sequence_num < window_starting_index + WINDOWS_SIZE and next_sequence_num < chunkNumber:
+            chunk = chunks[next_sequence_num]
             last_file_chunk = False
-            if nextSeqNum == chunkNumber-1:
+            if next_sequence_num == chunkNumber-1:
                 last_file_chunk = True
-            chunk = nextSeqNum.to_bytes(2, byteorder='big') + last_file_chunk.to_bytes(1, byteorder='big') + chunk
+            chunk = next_sequence_num.to_bytes(2, byteorder='big') + last_file_chunk.to_bytes(1, byteorder='big') + chunk
             socket_udp.sendto(chunk, recieverAddressPort)
-            print("Message sent successfully..... {}".format(nextSeqNum))
-            nextSeqNum += 1
+            print("Message sent successfully..... {}".format(next_sequence_num))
+            next_sequence_num += 1
             total_size += len(chunk)
             total_transmissions += 1
         mutex_lock.release()
@@ -69,26 +69,26 @@ def send_func():
 
 
 def receive_func():
-    global base
+    global window_starting_index
     global chunks
     global chunkNumber
-    global nextSeqNum
+    global next_sequence_num
     global mutex_lock
-    while base < chunkNumber:
+    while window_starting_index < chunkNumber:
         try:
             recievedMessage, senderAddress = socket_udp.recvfrom(bufferSize)
             mutex_lock.acquire()
             recievedMessage = int(recievedMessage.decode())
-            if recievedMessage != base:
+            if recievedMessage != window_starting_index:
                 mutex_lock.release()
                 raise socket.timeout
             print("Message from Server: {}".format(recievedMessage))
-            base = recievedMessage + 1
+            window_starting_index = recievedMessage + 1
             mutex_lock.release()
         except socket.timeout:
             mutex_lock.acquire()
-            print("Timeout occured, sending again: ", base, nextSeqNum)
-            nextSeqNum = base
+            print("Timeout occured, sending again: ", window_starting_index, next_sequence_num)
+            next_sequence_num = window_starting_index
             mutex_lock.release()
 
 def main():
