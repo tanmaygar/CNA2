@@ -59,3 +59,9 @@ $ sudo mn
     ```
 
 - The program will automatically send the image chunks to the reciever and the reciever will automatically save the image in the directory
+
+
+NOTE:
+The code is written in python3 and the image is in jpg format. Please make sure that the image is in the same directory as the python files. Also, the image name is testFile.jpg. If you want to change the image name, please change the name in the python files as well.
+
+Also, the scripts ```scripts_h1.sh``` and ```scripts_h2.sh``` are different linux commands than the one given in the pdf as instructed by the Teaching Assistants. Please use the scripts given in the directory.
