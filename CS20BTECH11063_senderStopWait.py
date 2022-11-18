@@ -60,7 +60,9 @@ for chunk in chunks:
             socket_udp.sendto(message, recieverAddressPort)
             total_retransmissions += 1
             total_transmissions += 1
-    
+
+# send empty chunk to indicate end of file
+socket_udp.sendto(b'', recieverAddressPort)    
 socket_udp.close()
 
 end_time = time.time()

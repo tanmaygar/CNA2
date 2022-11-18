@@ -29,6 +29,9 @@ while True:
     #split the recieved tuple into variables
     senderAddress = bytesAddressPair[1]
     recievedMessage = bytesAddressPair[0]
+    #if packet is empty, then end of file
+    if len(recievedMessage) == 0:
+        break
     chunk_number = int.from_bytes(recievedMessage[0:2], byteorder='big')
     chunkNumber = chunk_number
     # prevChunkNumber = chunkNumber
@@ -57,9 +60,6 @@ while True:
     message = str.encode("Recieved {}".format(chunk_number))
     socket_udp.sendto(message, senderAddress)
 
-    if last_file_chunk == True:
-        break
-
 # open image file
 image = open("received.jpg", "wb")
 # read image file in chunks
@@ -67,7 +67,7 @@ for chunk in chunks:
     image.write(chunks[chunk])
 # close image file
 image.close()
-
+print(len(chunks))
 print("Image recieved successfully")
 
 print("Total packets recieved: {}".format(total_packets_received))
