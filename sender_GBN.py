@@ -32,7 +32,7 @@ print(chunkNumber)
 # Implement Go Back N protocol
 # send chunks in chunks dictionary
 
-WINDOWS_SIZE = 256
+WINDOWS_SIZE = 1
 base = 0
 nextSeqNum = 0
 mutex_lock = threading.Lock()
@@ -92,18 +92,27 @@ def receive_func():
             mutex_lock.release()
 
 def main():
+    start_time = time.time()
     send_thread = threading.Thread(target=send_func)
     # receive_thread = threading.Thread(target=receive_func)
     send_thread.start()
     # receive_thread.start()
     send_thread.join()
     # receive_thread.join()
+    # close the socket
+    socket_udp.close()
+    end_time = time.time()
+    # average throughput
+    print("Average throughput: ", (total_size/1024)/(end_time-start_time))
+    with open("output2.txt", "a") as f:
+        f.write("{}:{}:{}\n".format(TIMEOUT * 1000, WINDOWS_SIZE , total_size/(end_time-start_time)))
+        #close the file
+    f.close()
 
 
 if __name__ == "__main__":
     main()
-    # close the socket
-    socket_udp.close()
+    
 # try:
 #     while base < chunkNumber:
 #         while nextSeqNum < base + WINDOWS_SIZE and nextSeqNum < chunkNumber:
